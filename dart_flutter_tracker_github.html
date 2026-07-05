@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>متابعة تعلّم Dart & Flutter</title>
+<style>
+  :root{
+    --bg:#0A0E14;
+    --panel:#111826;
+    --panel-2:#0D1420;
+    --line:#1E2A3A;
+    --text:#E7EEF7;
+    --sub:#8CA0B8;
+    --dart-blue:#0175C2;
+    --flutter-cyan:#13B9FD;
+    --done:#2ECC8F;
+    --done-dim:#173A2E;
+    --warn:#F2B84B;
+  }
+  #app-root{
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    direction: rtl;
+    background: var(--bg);
+    color: var(--text);
+    padding: 28px 20px 60px;
+    min-height: 100%;
+    box-sizing: border-box;
+  }
+  *{box-sizing:border-box;}
+  .wrap{max-width:980px;margin:0 auto;}
+
+  .hero{
+    position:relative;
+    background: linear-gradient(135deg, #0D1B2A 0%, #0A2540 55%, #0A3050 100%);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:26px 28px;
+    margin-bottom:22px;
+    overflow:hidden;
+  }
+  .hero::after{
+    content:"";
+    position:absolute; inset:0;
+    background: radial-gradient(circle at 85% -10%, rgba(19,185,253,0.25), transparent 55%);
+    pointer-events:none;
+  }
+  .hero h1{
+    margin:0 0 6px;
+    font-size:22px;
+    font-weight:800;
+    display:flex; align-items:center; gap:10px;
+  }
+  .hero p{margin:0; color:var(--sub); font-size:13.5px; line-height:1.7;}
+  .hero .dot{width:9px;height:9px;border-radius:50%;background:linear-gradient(90deg,var(--dart-blue),var(--flutter-cyan));display:inline-block;}
+
+  .overall{
+    display:flex; align-items:center; gap:18px; margin-top:18px; position:relative; z-index:1;
+  }
+  .ring{width:70px;height:70px;flex:0 0 auto;}
+  .overall-stats{flex:1;}
+  .overall-bar-track{background:#0A121D;border:1px solid var(--line);border-radius:99px;height:10px;overflow:hidden;}
+  .overall-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--dart-blue),var(--flutter-cyan));transition:width .4s ease;}
+  .overall-nums{display:flex;justify-content:space-between;font-size:12px;color:var(--sub);margin-top:6px;}
+  .overall-nums b{color:var(--text);font-size:13px;}
+
+  .toolbar{
+    display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; align-items:center;
+  }
+  .toolbar button{
+    background:var(--panel); border:1px solid var(--line); color:var(--sub);
+    padding:8px 14px; border-radius:99px; font-size:12.5px; cursor:pointer; transition:.15s;
+  }
+  .toolbar button.active{background:linear-gradient(90deg,var(--dart-blue),var(--flutter-cyan)); color:#03131F; border-color:transparent; font-weight:700;}
+  .toolbar button:hover{border-color:var(--flutter-cyan);}
+  .toolbar .reset{margin-inline-start:auto; color:#F27A6B; border-color:#4A2A28;}
+  .toolbar .reset:hover{border-color:#F27A6B;}
+
+  .category{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    margin-bottom:14px;
+    overflow:hidden;
+  }
+  .cat-head{
+    display:flex; align-items:center; gap:12px;
+    padding:15px 18px; cursor:pointer;
+    user-select:none;
+  }
+  .cat-num{
+    width:30px;height:30px;border-radius:8px;flex:0 0 auto;
+    background:var(--panel-2); border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px; font-weight:800; color:var(--flutter-cyan);
+  }
+  .cat-title{font-size:14.5px; font-weight:700; flex:1;}
+  .cat-title span{display:block; font-size:11.5px; color:var(--sub); font-weight:400; margin-top:2px;}
+  .cat-progress-mini{width:110px;}
+  .cat-progress-track{background:#0A121D;border-radius:99px;height:6px;overflow:hidden;border:1px solid var(--line);}
+  .cat-progress-fill{height:100%;background:linear-gradient(90deg,var(--dart-blue),var(--flutter-cyan));}
+  .cat-count{font-size:11px;color:var(--sub); white-space:nowrap; min-width:44px; text-align:left;}
+  .chev{transition:transform .2s; color:var(--sub); flex:0 0 auto;}
+  .chev.open{transform:rotate(90deg);}
+
+  .cat-body{
+    border-top:1px solid var(--line);
+    padding:6px 10px 10px;
+    display:none;
+  }
+  .cat-body.open{display:block;}
+
+  .task{
+    display:flex; align-items:center; gap:12px;
+    padding:10px 10px;
+    border-radius:9px;
+    margin:2px 0;
+    transition:background .15s;
+  }
+  .task:hover{background:var(--panel-2);}
+  .task.done{opacity:.65;}
+  .checkbox{
+    width:20px;height:20px;border-radius:6px;flex:0 0 auto;
+    border:1.5px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer; transition:.15s;
+    background:var(--panel-2);
+  }
+  .checkbox.checked{background:var(--done); border-color:var(--done);}
+  .checkbox svg{width:12px;height:12px;display:none;}
+  .checkbox.checked svg{display:block;}
+  .task-label{font-size:13.5px; flex:1; cursor:pointer; line-height:1.5;}
+  .task.done .task-label{text-decoration:line-through; color:var(--sub);}
+  .badge{
+    font-size:10px; padding:3px 8px; border-radius:99px; flex:0 0 auto;
+    border:1px solid var(--line); color:var(--sub);
+  }
+  .badge.beg{color:#8CE0B0; border-color:#1E4A36;}
+  .badge.mid{color:var(--warn); border-color:#4A3A1E;}
+  .badge.adv{color:#F27A6B; border-color:#4A2A28;}
+
+  .footer-note{
+    text-align:center; color:var(--sub); font-size:11.5px; margin-top:20px; line-height:1.8;
+  }
+  .loading{text-align:center; color:var(--sub); padding:40px; font-size:13px;}
+</style>
+</head>
+<body>
+<div id="app-root"></div>
+
+<script>
+(function(){
+
+const CATEGORIES = [
+  { id:"c1", title:"أساسيات لغة Dart", sub:"القواعد الأساسية للغة قبل الدخول إلى Flutter", level:"beg", tasks:[
+    "المتغيرات وأنواع البيانات (var, final, const)",
+    "العمليات الحسابية والمنطقية والشروط (if/else, switch)",
+    "الحلقات التكرارية (for, while, do-while)",
+    "الدوال (Functions) والمعاملات الاختيارية والمسماة",
+    "المجموعات: List, Set, Map",
+    "Null Safety (?, !, late, required)",
+    "البرمجة الكائنية: Classes & Objects & Constructors",
+    "الوراثة (Inheritance) و extends",
+    "الواجهات (Interfaces) و implements",
+    "Mixins و with",
+    "Abstract Classes",
+    "Enums",
+    "Generics",
+    "معالجة الاستثناءات (try/catch/finally, custom exceptions)",
+    "البرمجة غير المتزامنة: Future و async/await",
+    "Stream و StreamController و StreamBuilder",
+    "Extension Methods",
+    "دوال المجموعات المتقدمة (map, where, reduce, fold, sort)"
+  ]},
+  { id:"c2", title:"أساسيات Flutter", sub:"بناء أول واجهات تفاعلية", level:"beg", tasks:[
+    "تثبيت بيئة العمل (Flutter SDK, Android Studio / VS Code)",
+    "فهم شجرة الويدجت (Widget Tree) وآلية البناء (build)",
+    "StatelessWidget مقابل StatefulWidget",
+    "دورة حياة الـ State (initState, setState, dispose)",
+    "ويدجتات Material الأساسية (Scaffold, AppBar, Text, Icon)",
+    "ويدجتات التخطيط (Row, Column, Stack, Container, Expanded, Flexible)",
+    "ListView و GridView و بناء القوائم الديناميكية",
+    "التنقل الأساسي (Navigator 1.0, push/pop)",
+    "التنقل المتقدم (Named Routes و go_router)",
+    "Forms و TextFormField والتحقق من الصحة (Validation)",
+    "الصور والخطوط والأصول (Assets)",
+    "التعامل مع اللمس (GestureDetector, InkWell)"
+  ]},
+  { id:"c3", title:"إدارة الحالة (State Management)", sub:"التحكم في بيانات وحالة التطبيق بشكل احترافي", level:"mid", tasks:[
+    "setState الأساسية وحدودها",
+    "Provider",
+    "Riverpod",
+    "Bloc / Cubit",
+    "GetX",
+    "المقارنة بين الحلول واختيار الأنسب حسب حجم المشروع"
+  ]},
+  { id:"c4", title:"الشبكات والبيانات", sub:"ربط التطبيق بمصادر بيانات خارجية", level:"mid", tasks:[
+    "حزمة http الأساسية",
+    "Dio و Interceptors و Middleware",
+    "التكامل مع REST API",
+    "تحويل JSON (json_serializable, freezed)",
+    "تخزين محلي بسيط: SharedPreferences",
+    "قواعد بيانات محلية: sqflite / Hive / Isar",
+    "التكامل مع Supabase",
+    "Firebase (Auth, Firestore, Storage, FCM)",
+    "WebSockets والبيانات اللحظية"
+  ]},
+  { id:"c5", title:"البنية المعمارية (Architecture)", sub:"تنظيم كود قابل للتوسع والصيانة", level:"mid", tasks:[
+    "Clean Architecture في Flutter",
+    "نمط MVVM",
+    "حقن التبعيات (Dependency Injection: get_it, injectable)",
+    "Repository Pattern",
+    "تنظيم الملفات (Feature-first مقابل Layer-first)",
+    "أنماط تصميم أساسية (Singleton, Factory, Observer)"
+  ]},
+  { id:"c6", title:"واجهات متقدمة (Advanced UI/UX)", sub:"تجربة استخدام احترافية وسلسة", level:"mid", tasks:[
+    "Animations أساسية (AnimatedContainer, AnimatedOpacity)",
+    "AnimationController و Tween و Curves",
+    "Custom Painters والرسم اليدوي",
+    "التصميم المتجاوب (MediaQuery, LayoutBuilder)",
+    "الثيمات والوضع الليلي/النهاري (Theming)",
+    "دعم تعدد اللغات (Localization / intl)",
+    "بناء ويدجتات مخصصة قابلة لإعادة الاستخدام"
+  ]},
+  { id:"c7", title:"الاختبار (Testing)", sub:"ضمان جودة الكود قبل الإطلاق", level:"adv", tasks:[
+    "Unit Testing",
+    "Widget Testing",
+    "Integration Testing",
+    "المحاكاة (Mocking) باستخدام mockito / mocktail",
+    "قياس تغطية الاختبارات (Test Coverage)"
+  ]},
+  { id:"c8", title:"التكامل مع المنصة (Native & Platform)", sub:"الوصول لإمكانيات الجهاز", level:"adv", tasks:[
+    "Platform Channels (Native code)",
+    "إدارة الأذونات (Permissions)",
+    "الكاميرا وتحديد الموقع الجغرافي",
+    "الإشعارات (Push Notifications)",
+    "التعامل مع نظام الملفات (File System)"
+  ]},
+  { id:"c9", title:"الأداء والتحسين (Performance)", sub:"تطبيق سريع وخفيف", level:"adv", tasks:[
+    "أنماط البناء (Debug / Profile / Release)",
+    "استخدام Flutter DevTools",
+    "تحليل تسريبات الذاكرة (Memory Leaks)",
+    "Lazy Loading و Pagination",
+    "تقليل حجم التطبيق (App Size Optimization)"
+  ]},
+  { id:"c10", title:"DevOps والنشر", sub:"إخراج التطبيق للعالم الحقيقي", level:"adv", tasks:[
+    "Git و GitHub لمشاريع Flutter",
+    "CI/CD (Codemagic / GitHub Actions)",
+    "توقيع التطبيق (App Signing)",
+    "النشر على Google Play",
+    "النشر على App Store",
+    "إدارة الإصدارات (Versioning & Changelog)"
+  ]},
+  { id:"c11", title:"الاحتراف والتخصص", sub:"الانتقال من مطوّر إلى محترف", level:"adv", tasks:[
+    "Flutter Web و Desktop",
+    "بناء ونشر Package خاص بك على pub.dev",
+    "المساهمة في مشاريع Open Source",
+    "كتابة كود نظيف ومبادئ SOLID",
+    "بناء مشروع Capstone كامل للـ Portfolio",
+    "متابعة تحديثات Flutter و Release Notes بشكل دوري"
+  ]}
+];
+
+const STORAGE_KEY = "dart_flutter_progress_v1";
+let doneSet = new Set();
+let openCats = new Set([CATEGORIES[0].id]);
+let filter = "all"; // all | pending | done
+
+const root = document.getElementById("app-root");
+
+function taskId(catId, idx){ return catId + "_" + idx; }
+
+function totalCounts(){
+  let total=0, done=0;
+  CATEGORIES.forEach(c=>{
+    c.tasks.forEach((_,i)=>{
+      total++;
+      if(doneSet.has(taskId(c.id,i))) done++;
+    });
+  });
+  return {total, done};
+}
+
+function catCounts(c){
+  let total=c.tasks.length, done=0;
+  c.tasks.forEach((_,i)=>{ if(doneSet.has(taskId(c.id,i))) done++; });
+  return {total, done};
+}
+
+function levelLabel(l){
+  return l==="beg" ? "أساسي" : l==="mid" ? "متوسط" : "متقدم";
+}
+
+async function saveProgress(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(doneSet)));
+  }catch(e){ console.error("save failed", e); }
+}
+
+async function loadProgress(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    doneSet = raw ? new Set(JSON.parse(raw)) : new Set();
+  }catch(e){
+    doneSet = new Set();
+  }
+}
+
+function checkIcon(){
+  return '<svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5L9.5 18L20 6" stroke="#03131F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+function chevIcon(){
+  return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function render(){
+  const {total, done} = totalCounts();
+  const pct = total ? Math.round((done/total)*100) : 0;
+
+  let html = `
+  <div class="wrap">
+    <div class="hero">
+      <h1><span class="dot"></span> خارطة طريق تعلّم Dart &amp; Flutter</h1>
+      <p>من الصفر حتى الاحتراف — علّم كل بند بأنه "تم" فور إنهائه لتتابع تقدمك الفعلي.</p>
+      <div class="overall">
+        <div class="overall-stats" style="width:100%">
+          <div class="overall-bar-track"><div class="overall-bar-fill" style="width:${pct}%"></div></div>
+          <div class="overall-nums">
+            <span>التقدم الكلي</span>
+            <b>${done} / ${total} — ${pct}%</b>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button data-filter="all" class="${filter==='all'?'active':''}">الكل</button>
+      <button data-filter="pending" class="${filter==='pending'?'active':''}">المتبقي فقط</button>
+      <button data-filter="done" class="${filter==='done'?'active':''}">المنجز فقط</button>
+      <button class="reset" id="resetBtn">تصفير التقدم</button>
+    </div>
+
+    <div id="cats"></div>
+
+    <div class="footer-note">
+      يتم حفظ تقدمك تلقائياً في متصفحك على هذا الجهاز. لو فتحت الصفحة من متصفح أو جهاز آخر، التقدم يبلش من جديد.
+    </div>
+  </div>`;
+
+  root.innerHTML = html;
+
+  const catsWrap = root.querySelector("#cats");
+  CATEGORIES.forEach((c, ci)=>{
+    const {total:ct, done:cd} = catCounts(c);
+    const cpct = ct ? Math.round((cd/ct)*100) : 0;
+    const isOpen = openCats.has(c.id);
+
+    const catEl = document.createElement("div");
+    catEl.className = "category";
+    catEl.innerHTML = `
+      <div class="cat-head" data-cat="${c.id}">
+        <div class="cat-num">${String(ci+1).padStart(2,'0')}</div>
+        <div class="cat-title">${c.title}<span>${c.sub}</span></div>
+        <div class="cat-progress-mini">
+          <div class="cat-progress-track"><div class="cat-progress-fill" style="width:${cpct}%"></div></div>
+        </div>
+        <div class="cat-count">${cd}/${ct}</div>
+        <div class="chev ${isOpen?'open':''}">${chevIcon()}</div>
+      </div>
+      <div class="cat-body ${isOpen?'open':''}" data-body="${c.id}"></div>
+    `;
+    catsWrap.appendChild(catEl);
+
+    const body = catEl.querySelector(`[data-body="${c.id}"]`);
+    c.tasks.forEach((label, idx)=>{
+      const tid = taskId(c.id, idx);
+      const isDone = doneSet.has(tid);
+      if(filter==="pending" && isDone) return;
+      if(filter==="done" && !isDone) return;
+
+      const taskEl = document.createElement("div");
+      taskEl.className = "task" + (isDone ? " done" : "");
+      taskEl.innerHTML = `
+        <div class="checkbox ${isDone?'checked':''}" data-task="${tid}">${checkIcon()}</div>
+        <div class="task-label" data-task="${tid}">${label}</div>
+        <div class="badge ${c.level}">${levelLabel(c.level)}</div>
+      `;
+      body.appendChild(taskEl);
+    });
+  });
+
+  // events
+  root.querySelectorAll(".cat-head").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      const id = el.getAttribute("data-cat");
+      if(openCats.has(id)) openCats.delete(id); else openCats.add(id);
+      render();
+    });
+  });
+
+  root.querySelectorAll("[data-task]").forEach(el=>{
+    el.addEventListener("click", async (e)=>{
+      e.stopPropagation();
+      const tid = el.getAttribute("data-task");
+      if(doneSet.has(tid)) doneSet.delete(tid); else doneSet.add(tid);
+      render();
+      await saveProgress();
+    });
+  });
+
+  root.querySelectorAll(".toolbar [data-filter]").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      filter = el.getAttribute("data-filter");
+      render();
+    });
+  });
+
+  const resetBtn = root.querySelector("#resetBtn");
+  if(resetBtn){
+    resetBtn.addEventListener("click", async ()=>{
+      if(confirm("هل تريد تصفير كل التقدم؟ لا يمكن التراجع عن هذا.")){
+        doneSet = new Set();
+        render();
+        await saveProgress();
+      }
+    });
+  }
+}
+
+async function init(){
+  root.innerHTML = '<div class="loading">جاري تحميل تقدمك المحفوظ...</div>';
+  await loadProgress();
+  render();
+}
+
+init();
+})();
+</script>
+</body>
+</html>
